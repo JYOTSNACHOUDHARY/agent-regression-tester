@@ -17,7 +17,7 @@ from langgraph.prebuilt import ToolNode, tools_condition
 from pydantic import BaseModel, Field
 
 from langchain.chat_models import init_chat_model
-llm = init_chat_model("gpt-4o", model_provider="openai")
+llm = init_chat_model("gpt-4o-mini", model_provider="openai")
 
 validator_prompt_template = ChatPromptTemplate.from_template(validator_prompt)
 decision_prompt_template = ChatPromptTemplate.from_template(decision_prompt)
