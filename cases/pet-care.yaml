@@ -1,0 +1,173 @@
+id: pet-care
+description: Generate, research and decide on startup ideas for the 'pet care' domain.
+input: pet care
+reference:
+  output: |-
+    ---
+
+    **Idea**: Pet Health Monitoring Wearable Device
+    **Decision**: Go
+    **Reasoning**:
+    - **Market Potential**: A $1B market with a 5% CAGR presents stable growth potential, indicating a strong opportunity for innovative products.
+    - **Competitive Landscape**: The presence of generic competitors suggests room for differentiation and specialization in advanced technology.
+    - **Trend Alignment**: Emerging trends likely support tech integration in pet care, aligning well with a monitoring device.
+    - **Legal or Execution Risk**: With a risk score of 4, it is comparatively low, indicating manageable compliance and execution challenges.
+    - **Summary**: A scalable opportunity with positive alignment to market trends and a manageable risk profile makes this a promising venture.
+
+    ---
+
+    **Idea**: On-Demand Mobile Pet Grooming Service
+    **Decision**: No-Go
+    **Reasoning**:
+    - **Market Potential**: The fixed $1B market with moderate growth at 5% is less ideal for a service-based model with potentially high operational costs.
+    - **Competitive Landscape**: Competing against established players without clear differentiation adds to the challenge.
+    - **Trend Alignment**: Trends do not specifically favor or highlight growth in service delivery models within this domain.
+    - **Legal or Execution Risk**: With a risk score of 5, risks seem higher, which is a concern for scaling services responsibly.
+    - **Summary**: Higher operational risks and lack of clear trend support suggest this service model may struggle to achieve significant growth.
+
+    ---
+
+    **Idea**: Subscription-Based Pet Nutrition Plans
+    **Decision**: Go
+    **Reasoning**:
+    - **Market Potential**: While the market size remains constant, a niche focus can capture dedicated segments within this modestly growing market.
+    - **Competitive Landscape**: Generic competitors open a window for specialized nutrition offerings.
+    - **Trend Alignment**: Emerging trends might include shifts towards better nutrition, supporting this subscription model.
+    - **Legal or Execution Risk**: Despite a risk score of 5, the execution risk might be tolerated due to potential consumer demand for personalized nutrition.
+    - **Summary**: While there are execution risks, alignment with growing interest in personal health and nutrition trends could allow this idea to carve out a profitable niche.
+
+    ---
+  tool_sequence:
+  - market_size_estimator
+  - competitor_finder
+  - trend_finder
+  - legal_risk_checker
+  - risk_score_calculator
+  - risk_score_calculator
+  - risk_score_calculator
+  total_tokens: 1861
+  cost_usd: 0.009752
+  latency_s: 7.803
+  steps: 10
+  tool_results:
+  - name: market_size_estimator
+    args:
+      domain: pet care
+      mock: true
+    output: 'Estimate market size and CAGR for domain -  pet care are: {''market_size'': ''$1B'', ''cagr'':
+      ''5%''}'
+    artifact: null
+  - name: competitor_finder
+    args:
+      domain: pet care
+      mock: true
+    output: 'Competitors for domain pet care are: [''GenericCompetitor1'', ''GenericCompetitor2'']'
+    artifact: null
+  - name: trend_finder
+    args:
+      domain: pet care
+      mock: true
+    output: 'Found trends for domain -  pet care are: [''Emerging Trend 1'', ''Emerging Trend 2'']'
+    artifact: null
+  - name: legal_risk_checker
+    args:
+      domain: pet care
+      mock: true
+    output: 'Legal risk for domain pet care are: [''General Compliance Risk'']'
+    artifact: null
+  - name: risk_score_calculator
+    args:
+      idea_details: Pet Health Monitoring Wearable Device
+      mock: true
+    output: 'Total risk score for an idea - Pet Health Monitoring Wearable Device are: 4'
+    artifact: null
+  - name: risk_score_calculator
+    args:
+      idea_details: On-Demand Mobile Pet Grooming Service
+      mock: true
+    output: 'Total risk score for an idea - On-Demand Mobile Pet Grooming Service are: 5'
+    artifact: null
+  - name: risk_score_calculator
+    args:
+      idea_details: Subscription-Based Pet Nutrition Plans
+      mock: true
+    output: 'Total risk score for an idea - Subscription-Based Pet Nutrition Plans are: 5'
+    artifact: null
+expect:
+  required_tools:
+  - competitor_finder
+  - legal_risk_checker
+  - market_size_estimator
+  - risk_score_calculator
+  - trend_finder
+  forbidden_tools: []
+  tool_order: []
+  tool_args: {}
+  max_tokens: 2792
+  max_cost_usd: 0.014628
+  max_latency_s: 23.41
+  max_steps: 15
+  output_contains: []
+  output_regex:
+  - \*\*Decision\*\*:\s*(Go|No-Go)
+  no_tool_errors: true
+judge:
+  enabled: true
+  criteria:
+  - Gives an explicit Go or No-Go decision for every idea it discusses.
+  - Covers every startup idea that appears in the evidence (each idea has a risk_score_calculator result).
+  - Cites specific figures from the evidence, such as the market size, CAGR and risk scores.
+  - Names specific competitors, trends or legal risks taken from the evidence.
+  - Makes no claims that contradict or go beyond the evidence (no invented figures or facts).
+  - Each decision is consistent with the reasoning given for it.
+tool_stubs:
+- name: market_size_estimator
+  args:
+    domain: pet care
+    mock: true
+  output: 'Estimate market size and CAGR for domain -  pet care are: {''market_size'': ''$1B'', ''cagr'':
+    ''5%''}'
+  artifact:
+    market_size: $1B
+    cagr: 5%
+- name: competitor_finder
+  args:
+    domain: pet care
+    mock: true
+  output: 'Competitors for domain pet care are: [''GenericCompetitor1'', ''GenericCompetitor2'']'
+  artifact:
+  - GenericCompetitor1
+  - GenericCompetitor2
+- name: trend_finder
+  args:
+    domain: pet care
+    mock: true
+  output: 'Found trends for domain -  pet care are: [''Emerging Trend 1'', ''Emerging Trend 2'']'
+  artifact:
+  - Emerging Trend 1
+  - Emerging Trend 2
+- name: legal_risk_checker
+  args:
+    domain: pet care
+    mock: true
+  output: 'Legal risk for domain pet care are: [''General Compliance Risk'']'
+  artifact:
+  - General Compliance Risk
+- name: risk_score_calculator
+  args:
+    idea_details: Pet Health Monitoring Wearable Device
+    mock: true
+  output: 'Total risk score for an idea - Pet Health Monitoring Wearable Device are: 4'
+  artifact: 4
+- name: risk_score_calculator
+  args:
+    idea_details: On-Demand Mobile Pet Grooming Service
+    mock: true
+  output: 'Total risk score for an idea - On-Demand Mobile Pet Grooming Service are: 5'
+  artifact: 5
+- name: risk_score_calculator
+  args:
+    idea_details: Subscription-Based Pet Nutrition Plans
+    mock: true
+  output: 'Total risk score for an idea - Subscription-Based Pet Nutrition Plans are: 5'
+  artifact: 5

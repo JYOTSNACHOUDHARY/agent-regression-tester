@@ -1,0 +1,175 @@
+id: healthcare
+description: Generate, research and decide on startup ideas for the 'healthcare' domain.
+input: healthcare
+reference:
+  output: |-
+    ---
+
+    **Idea**: Virtual Reality Cognitive Therapy App
+    **Decision**: No-Go
+    **Reasoning**:
+    - Market Potential: The overall healthcare market size is substantial at $10B with a solid growth rate of 12%, but VR-specific cognitive therapy within this is not highlighted, indicating a niche segment not well detailed.
+    - Competitive Landscape: The presence of strong competitors like MediTech, HealthFirst, and CareWell, though focused generally on healthcare, suggests a competitive market where differentiation will be crucial but none specifically around VR cognitive therapy have been mentioned.
+    - Trend Alignment: Current trends like AI Diagnostics and Remote Patient Monitoring do not directly support the relevance of a Virtual Reality Cognitive Therapy App.
+    - Legal or Execution Risk: A risk score of 7 indicates moderate risk, notably within patient data privacy compliance under HIPAA, which may be exacerbated by VR data concerns.
+    - Summary: No-Go due to unclear market opportunity, indirect trend support, and competitive challenges.
+
+    ---
+
+    **Idea**: AI-Driven Remote Patient Monitoring Solution
+    **Decision**: Go
+    **Reasoning**:
+    - Market Potential: An excellent fit within a growing healthcare market of $10B and 12% CAGR, indicating robust potential as part of a growth sector.
+    - Competitive Landscape: Established competitors show there is a viable market; the niche focus on AI-driven solutions can carve out a distinguishing factor.
+    - Trend Alignment: Strong alignment with current trends in Remote Patient Monitoring, suggesting high relevance and timely entry potential.
+    - Legal or Execution Risk: A risk score of 8, though higher, is manageable with attention to patient data privacy and HIPAA compliance, given the potential market rewards.
+    - Summary: Go due to strong market alignment, relevant trends, and manageable risks, promising high potential in AI-driven remote monitoring.
+
+    ---
+
+    **Idea**: Blockchain-Enabled Medical Record Management System
+    **Decision**: No-Go
+    **Reasoning**:
+    - Market Potential: While the overall market is promising, blockchain-specific medical record management is a small segment with less clear defined market space in the data provided.
+    - Competitive Landscape: Healthcare giants are likely to compete in this area indirectly; however, there is little direct competition mentioned, suggesting a less saturated space but possibly challenging awareness and adoption.
+    - Trend Alignment: The focus on blockchain does not directly align with the current overt trends of AI and Remote Monitoring, indicating potential challenges in gaining traction.
+    - Legal or Execution Risk: With a risk score of 6, it is fairly low but includes complex legal compliance issues that could impede momentum.
+    - Summary: No-Go due to misalignment with current trends and unclear competitive dynamics that limit clear-cut market entry benefits.
+
+    ---
+  tool_sequence:
+  - market_size_estimator
+  - competitor_finder
+  - trend_finder
+  - legal_risk_checker
+  - risk_score_calculator
+  - risk_score_calculator
+  - risk_score_calculator
+  total_tokens: 1927
+  cost_usd: 0.010457
+  latency_s: 8.12
+  steps: 10
+  tool_results:
+  - name: market_size_estimator
+    args:
+      domain: healthcare
+      mock: true
+    output: 'Estimate market size and CAGR for domain -  healthcare are: {''market_size'': ''$10B'', ''cagr'':
+      ''12%''}'
+    artifact: null
+  - name: competitor_finder
+    args:
+      domain: healthcare
+      mock: true
+    output: 'Competitors for domain healthcare are: [''MediTech'', ''HealthFirst'', ''CareWell'']'
+    artifact: null
+  - name: trend_finder
+    args:
+      domain: healthcare
+      mock: true
+    output: 'Found trends for domain -  healthcare are: [''AI Diagnostics'', ''Remote Patient Monitoring'']'
+    artifact: null
+  - name: legal_risk_checker
+    args:
+      domain: healthcare
+      mock: true
+    output: 'Legal risk for domain healthcare are: [''HIPAA compliance'', ''Patient Data Privacy'']'
+    artifact: null
+  - name: risk_score_calculator
+    args:
+      idea_details: Virtual Reality Cognitive Therapy App
+      mock: true
+    output: 'Total risk score for an idea - Virtual Reality Cognitive Therapy App are: 7'
+    artifact: null
+  - name: risk_score_calculator
+    args:
+      idea_details: AI-Driven Remote Patient Monitoring Solution
+      mock: true
+    output: 'Total risk score for an idea - AI-Driven Remote Patient Monitoring Solution are: 8'
+    artifact: null
+  - name: risk_score_calculator
+    args:
+      idea_details: Blockchain-Enabled Medical Record Management System
+      mock: true
+    output: 'Total risk score for an idea - Blockchain-Enabled Medical Record Management System are: 6'
+    artifact: null
+expect:
+  required_tools:
+  - competitor_finder
+  - legal_risk_checker
+  - market_size_estimator
+  - risk_score_calculator
+  - trend_finder
+  forbidden_tools: []
+  tool_order: []
+  tool_args: {}
+  max_tokens: 2891
+  max_cost_usd: 0.015685
+  max_latency_s: 24.36
+  max_steps: 15
+  output_contains: []
+  output_regex:
+  - \*\*Decision\*\*:\s*(Go|No-Go)
+  no_tool_errors: true
+judge:
+  enabled: true
+  criteria:
+  - Gives an explicit Go or No-Go decision for every idea it discusses.
+  - Covers every startup idea that appears in the evidence (each idea has a risk_score_calculator result).
+  - Cites specific figures from the evidence, such as the market size, CAGR and risk scores.
+  - Names specific competitors, trends or legal risks taken from the evidence.
+  - Makes no claims that contradict or go beyond the evidence (no invented figures or facts).
+  - Each decision is consistent with the reasoning given for it.
+tool_stubs:
+- name: market_size_estimator
+  args:
+    domain: healthcare
+    mock: true
+  output: 'Estimate market size and CAGR for domain -  healthcare are: {''market_size'': ''$10B'', ''cagr'':
+    ''12%''}'
+  artifact:
+    market_size: $10B
+    cagr: 12%
+- name: competitor_finder
+  args:
+    domain: healthcare
+    mock: true
+  output: 'Competitors for domain healthcare are: [''MediTech'', ''HealthFirst'', ''CareWell'']'
+  artifact:
+  - MediTech
+  - HealthFirst
+  - CareWell
+- name: trend_finder
+  args:
+    domain: healthcare
+    mock: true
+  output: 'Found trends for domain -  healthcare are: [''AI Diagnostics'', ''Remote Patient Monitoring'']'
+  artifact:
+  - AI Diagnostics
+  - Remote Patient Monitoring
+- name: legal_risk_checker
+  args:
+    domain: healthcare
+    mock: true
+  output: 'Legal risk for domain healthcare are: [''HIPAA compliance'', ''Patient Data Privacy'']'
+  artifact:
+  - HIPAA compliance
+  - Patient Data Privacy
+- name: risk_score_calculator
+  args:
+    idea_details: Virtual Reality Cognitive Therapy App
+    mock: true
+  output: 'Total risk score for an idea - Virtual Reality Cognitive Therapy App are: 7'
+  artifact: 7
+- name: risk_score_calculator
+  args:
+    idea_details: AI-Driven Remote Patient Monitoring Solution
+    mock: true
+  output: 'Total risk score for an idea - AI-Driven Remote Patient Monitoring Solution are: 8'
+  artifact: 8
+- name: risk_score_calculator
+  args:
+    idea_details: Blockchain-Enabled Medical Record Management System
+    mock: true
+  output: 'Total risk score for an idea - Blockchain-Enabled Medical Record Management System are: 6'
+  artifact: 6

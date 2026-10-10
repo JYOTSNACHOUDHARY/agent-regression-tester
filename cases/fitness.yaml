@@ -1,0 +1,176 @@
+id: fitness
+description: Generate, research and decide on startup ideas for the 'fitness' domain.
+input: fitness
+reference:
+  output: |-
+    ---
+
+    **Idea**: Virtual Reality Fitness Classes
+    **Decision**: No-Go
+    **Reasoning:**
+    - Market Potential: The fitness market is moderately sized at $5B with a healthy growth rate of 8% CAGR, but Virtual Reality specifically may face adoption barriers.
+    - Competitive Landscape: High competition with well-established brands like FitTrack and GymSmart; differentiation may be challenging.
+    - Trend Alignment: Aligns with the trend of Virtual Personal Training, but depends heavily on consumer access to VR equipment.
+    - Legal or Execution Risk: Risk score of 8, especially with Injury Liability concerns and VR usage logistics.
+    - Summary: Despite alignment with trends, the competitive landscape and execution risks are significant barriers, making this a No-Go.
+
+    ---
+
+    **Idea**: Wearable AI Health Tracker
+    **Decision**: Go
+    **Reasoning:**
+    - Market Potential: The $5B fitness market with 8% CAGR is promising, and wearables are a rapidly growing segment with potential for innovation.
+    - Competitive Landscape: Though competitive, Wearable Health Devices align well with current consumer behaviors and demand.
+    - Trend Alignment: Strong alignment with the trend of Wearable Health Devices, which are increasingly popular and integrated into everyday life.
+    - Legal or Execution Risk: Risk score of 8; however, risks around User Data Protection can be mitigated with robust security protocols.
+    - Summary: Given the trend alignment and market potential, a well-executed wearable AI health tracker can capture significant market share, making this a Go.
+
+    ---
+
+    **Idea**: Customized Nutrition Planning Service
+    **Decision**: No-Go
+    **Reasoning:**
+    - Market Potential: While the market shows moderate growth, nutrition services are less directly aligned with the general fitness market financials provided.
+    - Competitive Landscape: Customization in nutrition is already offered by major competitors indirectly via broader health solutions.
+    - Trend Alignment: Lacks strong direct trend support compared to wearables or virtual training in the fitness domain.
+    - Legal or Execution Risk: Risk score of 8 with data protection as a prominent issue; adds complexity without substantial trend-driven motivation.
+    - Summary: The weak alignment with current market trends and existing indirect competition obstacles suggest a No-Go.
+
+    ---
+  tool_sequence:
+  - market_size_estimator
+  - competitor_finder
+  - trend_finder
+  - legal_risk_checker
+  - risk_score_calculator
+  - risk_score_calculator
+  - risk_score_calculator
+  total_tokens: 1809
+  cost_usd: 0.009405
+  latency_s: 6.369
+  steps: 10
+  tool_results:
+  - name: market_size_estimator
+    args:
+      domain: fitness
+      mock: true
+    output: 'Estimate market size and CAGR for domain -  fitness are: {''market_size'': ''$5B'', ''cagr'':
+      ''8%''}'
+    artifact: null
+  - name: competitor_finder
+    args:
+      domain: fitness
+      mock: true
+    output: 'Competitors for domain fitness are: [''FitTrack'', ''GymSmart'', ''MoveWell'']'
+    artifact: null
+  - name: trend_finder
+    args:
+      domain: fitness
+      mock: true
+    output: 'Found trends for domain -  fitness are: [''Wearable Health Devices'', ''Virtual Personal
+      Training'']'
+    artifact: null
+  - name: legal_risk_checker
+    args:
+      domain: fitness
+      mock: true
+    output: 'Legal risk for domain fitness are: [''Injury Liability'', ''User Data Protection'']'
+    artifact: null
+  - name: risk_score_calculator
+    args:
+      idea_details: Virtual Reality Fitness Classes
+      mock: true
+    output: 'Total risk score for an idea - Virtual Reality Fitness Classes are: 8'
+    artifact: null
+  - name: risk_score_calculator
+    args:
+      idea_details: Wearable AI Health Tracker
+      mock: true
+    output: 'Total risk score for an idea - Wearable AI Health Tracker are: 8'
+    artifact: null
+  - name: risk_score_calculator
+    args:
+      idea_details: Customized Nutrition Planning Service
+      mock: true
+    output: 'Total risk score for an idea - Customized Nutrition Planning Service are: 8'
+    artifact: null
+expect:
+  required_tools:
+  - competitor_finder
+  - legal_risk_checker
+  - market_size_estimator
+  - risk_score_calculator
+  - trend_finder
+  forbidden_tools: []
+  tool_order: []
+  tool_args: {}
+  max_tokens: 2714
+  max_cost_usd: 0.014108
+  max_latency_s: 19.11
+  max_steps: 15
+  output_contains: []
+  output_regex:
+  - \*\*Decision\*\*:\s*(Go|No-Go)
+  no_tool_errors: true
+judge:
+  enabled: true
+  criteria:
+  - Gives an explicit Go or No-Go decision for every idea it discusses.
+  - Covers every startup idea that appears in the evidence (each idea has a risk_score_calculator result).
+  - Cites specific figures from the evidence, such as the market size, CAGR and risk scores.
+  - Names specific competitors, trends or legal risks taken from the evidence.
+  - Makes no claims that contradict or go beyond the evidence (no invented figures or facts).
+  - Each decision is consistent with the reasoning given for it.
+tool_stubs:
+- name: market_size_estimator
+  args:
+    domain: fitness
+    mock: true
+  output: 'Estimate market size and CAGR for domain -  fitness are: {''market_size'': ''$5B'', ''cagr'':
+    ''8%''}'
+  artifact:
+    market_size: $5B
+    cagr: 8%
+- name: competitor_finder
+  args:
+    domain: fitness
+    mock: true
+  output: 'Competitors for domain fitness are: [''FitTrack'', ''GymSmart'', ''MoveWell'']'
+  artifact:
+  - FitTrack
+  - GymSmart
+  - MoveWell
+- name: trend_finder
+  args:
+    domain: fitness
+    mock: true
+  output: 'Found trends for domain -  fitness are: [''Wearable Health Devices'', ''Virtual Personal Training'']'
+  artifact:
+  - Wearable Health Devices
+  - Virtual Personal Training
+- name: legal_risk_checker
+  args:
+    domain: fitness
+    mock: true
+  output: 'Legal risk for domain fitness are: [''Injury Liability'', ''User Data Protection'']'
+  artifact:
+  - Injury Liability
+  - User Data Protection
+- name: risk_score_calculator
+  args:
+    idea_details: Virtual Reality Fitness Classes
+    mock: true
+  output: 'Total risk score for an idea - Virtual Reality Fitness Classes are: 8'
+  artifact: 8
+- name: risk_score_calculator
+  args:
+    idea_details: Wearable AI Health Tracker
+    mock: true
+  output: 'Total risk score for an idea - Wearable AI Health Tracker are: 8'
+  artifact: 8
+- name: risk_score_calculator
+  args:
+    idea_details: Customized Nutrition Planning Service
+    mock: true
+  output: 'Total risk score for an idea - Customized Nutrition Planning Service are: 8'
+  artifact: 8

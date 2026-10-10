@@ -1,0 +1,178 @@
+id: agritech
+description: Generate, research and decide on startup ideas for the 'agritech' domain.
+input: agritech
+reference:
+  output: |-
+    ---
+
+    **Idea**: Vertical Farming as a Service (VFaaS) for Urban Areas
+    **Decision**: Go
+    **Reasoning**:
+    - Market Potential: The market size of $1B with a 5% CAGR indicates moderate growth, suitable for specialized niches.
+    - Competitive Landscape: Presence of two generic competitors suggests a potential to carve out a niche with differentiated offerings.
+    - Trend Alignment: Emerging trends could support the urban agriculture focus, making it likely to gain traction.
+    - Legal or Execution Risk: Risk score of 4 indicates manageable risk, likely operational or related to scaling.
+    - Summary: Moderate growth and trend alignment make this idea viable within its niche.
+
+    ---
+
+    **Idea**: AI-Powered Soil Health Monitoring and Management System
+    **Decision**: Go
+    **Reasoning**:
+    - Market Potential: $1B market size with 5% CAGR supports novel tech integration for optimization, promising incremental value.
+    - Competitive Landscape: Generic competitors indicate space for specialization and leveraging AI for differentiation.
+    - Trend Alignment: Trends in agritech can favor AI for improved efficiency and sustainability.
+    - Legal or Execution Risk: Low risk score of 3 suggests minimal barriers to execution and regulatory compliance.
+    - Summary: Low risk and alignment with modern trends justify pursuing this innovative application.
+
+    ---
+
+    **Idea**: Blockchain-Enabled Agri Supply Chain Traceability Platform
+    **Decision**: No-Go
+    **Reasoning**:
+    - Market Potential: Same market metrics of $1B and 5% CAGR, but blockchain may face adoption barriers.
+    - Competitive Landscape: Competition may intensify with blockchain undercutting on cost or service differentiation.
+    - Trend Alignment: While trends hint at tech usage, blockchain adoption can lag due to industry conservatism.
+    - Legal or Execution Risk: High risk score of 8 signals substantial hurdles, possibly related to tech implementation or regulatory concerns.
+    - Summary: High execution risk and adoption challenges outweigh potential benefits in a stable growth market.
+
+    ---
+  tool_sequence:
+  - market_size_estimator
+  - competitor_finder
+  - trend_finder
+  - legal_risk_checker
+  - risk_score_calculator
+  - risk_score_calculator
+  - risk_score_calculator
+  total_tokens: 1870
+  cost_usd: 0.00955
+  latency_s: 5.954
+  steps: 10
+  tool_results:
+  - name: market_size_estimator
+    args:
+      domain: agritech
+      mock: true
+    output: 'Estimate market size and CAGR for domain -  agritech are: {''market_size'': ''$1B'', ''cagr'':
+      ''5%''}'
+    artifact: null
+  - name: competitor_finder
+    args:
+      domain: agritech
+      mock: true
+    output: 'Competitors for domain agritech are: [''GenericCompetitor1'', ''GenericCompetitor2'']'
+    artifact: null
+  - name: trend_finder
+    args:
+      domain: agritech
+      mock: true
+    output: 'Found trends for domain -  agritech are: [''Emerging Trend 1'', ''Emerging Trend 2'']'
+    artifact: null
+  - name: legal_risk_checker
+    args:
+      domain: agritech
+      mock: true
+    output: 'Legal risk for domain agritech are: [''General Compliance Risk'']'
+    artifact: null
+  - name: risk_score_calculator
+    args:
+      idea_details: Vertical Farming as a Service (VFaaS) for Urban Areas
+      mock: true
+    output: 'Total risk score for an idea - Vertical Farming as a Service (VFaaS) for Urban Areas are:
+      4'
+    artifact: null
+  - name: risk_score_calculator
+    args:
+      idea_details: AI-Powered Soil Health Monitoring and Management System
+      mock: true
+    output: 'Total risk score for an idea - AI-Powered Soil Health Monitoring and Management System are:
+      3'
+    artifact: null
+  - name: risk_score_calculator
+    args:
+      idea_details: Blockchain-Enabled Agri Supply Chain Traceability Platform
+      mock: true
+    output: 'Total risk score for an idea - Blockchain-Enabled Agri Supply Chain Traceability Platform
+      are: 8'
+    artifact: null
+expect:
+  required_tools:
+  - competitor_finder
+  - legal_risk_checker
+  - market_size_estimator
+  - risk_score_calculator
+  - trend_finder
+  forbidden_tools: []
+  tool_order: []
+  tool_args: {}
+  max_tokens: 2805
+  max_cost_usd: 0.014325
+  max_latency_s: 17.86
+  max_steps: 15
+  output_contains: []
+  output_regex:
+  - \*\*Decision\*\*:\s*(Go|No-Go)
+  no_tool_errors: true
+judge:
+  enabled: true
+  criteria:
+  - Gives an explicit Go or No-Go decision for every idea it discusses.
+  - Covers every startup idea that appears in the evidence (each idea has a risk_score_calculator result).
+  - Cites specific figures from the evidence, such as the market size, CAGR and risk scores.
+  - Names specific competitors, trends or legal risks taken from the evidence.
+  - Makes no claims that contradict or go beyond the evidence (no invented figures or facts).
+  - Each decision is consistent with the reasoning given for it.
+tool_stubs:
+- name: market_size_estimator
+  args:
+    domain: agritech
+    mock: true
+  output: 'Estimate market size and CAGR for domain -  agritech are: {''market_size'': ''$1B'', ''cagr'':
+    ''5%''}'
+  artifact:
+    market_size: $1B
+    cagr: 5%
+- name: competitor_finder
+  args:
+    domain: agritech
+    mock: true
+  output: 'Competitors for domain agritech are: [''GenericCompetitor1'', ''GenericCompetitor2'']'
+  artifact:
+  - GenericCompetitor1
+  - GenericCompetitor2
+- name: trend_finder
+  args:
+    domain: agritech
+    mock: true
+  output: 'Found trends for domain -  agritech are: [''Emerging Trend 1'', ''Emerging Trend 2'']'
+  artifact:
+  - Emerging Trend 1
+  - Emerging Trend 2
+- name: legal_risk_checker
+  args:
+    domain: agritech
+    mock: true
+  output: 'Legal risk for domain agritech are: [''General Compliance Risk'']'
+  artifact:
+  - General Compliance Risk
+- name: risk_score_calculator
+  args:
+    idea_details: Vertical Farming as a Service (VFaaS) for Urban Areas
+    mock: true
+  output: 'Total risk score for an idea - Vertical Farming as a Service (VFaaS) for Urban Areas are: 4'
+  artifact: 4
+- name: risk_score_calculator
+  args:
+    idea_details: AI-Powered Soil Health Monitoring and Management System
+    mock: true
+  output: 'Total risk score for an idea - AI-Powered Soil Health Monitoring and Management System are:
+    3'
+  artifact: 3
+- name: risk_score_calculator
+  args:
+    idea_details: Blockchain-Enabled Agri Supply Chain Traceability Platform
+    mock: true
+  output: 'Total risk score for an idea - Blockchain-Enabled Agri Supply Chain Traceability Platform are:
+    8'
+  artifact: 8

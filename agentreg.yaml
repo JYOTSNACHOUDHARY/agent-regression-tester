@@ -1,0 +1,16 @@
+# agentreg configuration - the agent under test and how strict the suite is.
+target: orchestrator.graph:graph          # module:attribute (a LangGraph graph / Runnable / function)
+pythonpath: [examples/startup_validator]  # added to sys.path before importing the target
+input_key: user_input                     # case input "healthcare" -> {"user_input": "healthcare"}
+output_path: messages[-1].content         # where the final answer lives in the graph's state
+
+cases_dir: cases
+traces_dir: traces
+reports_dir: reports
+
+budget_tolerance: 1.5    # tokens / cost / steps may grow 50% before failing
+latency_tolerance: 3.0   # latency is noisy; allow 3x
+
+judge:
+  enabled: true
+  model: openai:gpt-4.1-mini

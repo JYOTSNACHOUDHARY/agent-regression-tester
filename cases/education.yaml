@@ -1,0 +1,175 @@
+id: education
+description: Generate, research and decide on startup ideas for the 'education' domain.
+input: education
+reference:
+  output: |-
+    ---
+
+    **Idea**: EdTech AI Mentor Platform
+    **Decision**: Go
+    **Reasoning**:
+    - Market Potential: The education market size of $7B with a CAGR of 10% suggests substantial growth potential, supporting this AI-driven innovation.
+    - Competitive Landscape: Existing players like EduBright, Learnify, and SkillUp are focused on broader educational solutions, potentially leaving room for AI-specific niche expansion.
+    - Trend Alignment: Strong alignment with the trend of AI Tutors, reinforcing its relevance and potential impact in the market.
+    - Legal or Execution Risk: The total risk score of 7 is moderate. Concerns about student data privacy must be proactively managed.
+    - Summary: The EdTech AI Mentor Platform aligns well with market trends and exhibits strong growth potential despite moderate risks.
+
+    ---
+
+    **Idea**: Virtual Reality Classroom Experience
+    **Decision**: No-Go
+    **Reasoning**:
+    - Market Potential: Given the general education market size and growth, niche technologies like VR might face budget allocation challenges despite market potential.
+    - Competitive Landscape: Established competitors do not currently focus on VR, which may indicate either an opportunity or lack interest due to barriers.
+    - Trend Alignment: VR is not directly supported by current significant trends, suggesting it may not be timely.
+    - Legal or Execution Risk: The risk score of 8 is relatively high, indicating substantial execution and legal hurdles.
+    - Summary: The Virtual Reality Classroom Experience lacks trend alignment and faces significant risks, making it less viable at present.
+
+    ---
+
+    **Idea**: Skill-Based Micro-Certification Platform
+    **Decision**: Go
+    **Reasoning**:
+    - Market Potential: The projected market growth supports innovations specifically focused on evolving educational structures like micro-certifications.
+    - Competitive Landscape: Current competitors may not fully address the micro-certification space, allowing competitive differentiation.
+    - Trend Alignment: Strong alignment with microlearning platform trends, indicating potential high relevance and acceptance.
+    - Legal or Execution Risk: The lowest risk score of 5 suggests manageable risks, enhancing feasibility.
+    - Summary: The Skill-Based Micro-Certification Platform is well-aligned with market trends and carries manageable risks, making it a strong candidate for further pursuit.
+
+    ---
+  tool_sequence:
+  - market_size_estimator
+  - competitor_finder
+  - trend_finder
+  - legal_risk_checker
+  - risk_score_calculator
+  - risk_score_calculator
+  - risk_score_calculator
+  total_tokens: 1817
+  cost_usd: 0.009433
+  latency_s: 9.664
+  steps: 10
+  tool_results:
+  - name: market_size_estimator
+    args:
+      domain: education
+      mock: true
+    output: 'Estimate market size and CAGR for domain -  education are: {''market_size'': ''$7B'', ''cagr'':
+      ''10%''}'
+    artifact: null
+  - name: competitor_finder
+    args:
+      domain: education
+      mock: true
+    output: 'Competitors for domain education are: [''EduBright'', ''Learnify'', ''SkillUp'']'
+    artifact: null
+  - name: trend_finder
+    args:
+      domain: education
+      mock: true
+    output: 'Found trends for domain -  education are: [''AI Tutors'', ''Microlearning Platforms'']'
+    artifact: null
+  - name: legal_risk_checker
+    args:
+      domain: education
+      mock: true
+    output: 'Legal risk for domain education are: [''Student Data Privacy'', ''Content Licensing Issues'']'
+    artifact: null
+  - name: risk_score_calculator
+    args:
+      idea_details: EdTech AI Mentor Platform
+      mock: true
+    output: 'Total risk score for an idea - EdTech AI Mentor Platform are: 7'
+    artifact: null
+  - name: risk_score_calculator
+    args:
+      idea_details: Virtual Reality Classroom Experience
+      mock: true
+    output: 'Total risk score for an idea - Virtual Reality Classroom Experience are: 8'
+    artifact: null
+  - name: risk_score_calculator
+    args:
+      idea_details: Skill-Based Micro-Certification Platform
+      mock: true
+    output: 'Total risk score for an idea - Skill-Based Micro-Certification Platform are: 5'
+    artifact: null
+expect:
+  required_tools:
+  - competitor_finder
+  - legal_risk_checker
+  - market_size_estimator
+  - risk_score_calculator
+  - trend_finder
+  forbidden_tools: []
+  tool_order: []
+  tool_args: {}
+  max_tokens: 2726
+  max_cost_usd: 0.01415
+  max_latency_s: 28.99
+  max_steps: 15
+  output_contains: []
+  output_regex:
+  - \*\*Decision\*\*:\s*(Go|No-Go)
+  no_tool_errors: true
+judge:
+  enabled: true
+  criteria:
+  - Gives an explicit Go or No-Go decision for every idea it discusses.
+  - Covers every startup idea that appears in the evidence (each idea has a risk_score_calculator result).
+  - Cites specific figures from the evidence, such as the market size, CAGR and risk scores.
+  - Names specific competitors, trends or legal risks taken from the evidence.
+  - Makes no claims that contradict or go beyond the evidence (no invented figures or facts).
+  - Each decision is consistent with the reasoning given for it.
+tool_stubs:
+- name: market_size_estimator
+  args:
+    domain: education
+    mock: true
+  output: 'Estimate market size and CAGR for domain -  education are: {''market_size'': ''$7B'', ''cagr'':
+    ''10%''}'
+  artifact:
+    market_size: $7B
+    cagr: 10%
+- name: competitor_finder
+  args:
+    domain: education
+    mock: true
+  output: 'Competitors for domain education are: [''EduBright'', ''Learnify'', ''SkillUp'']'
+  artifact:
+  - EduBright
+  - Learnify
+  - SkillUp
+- name: trend_finder
+  args:
+    domain: education
+    mock: true
+  output: 'Found trends for domain -  education are: [''AI Tutors'', ''Microlearning Platforms'']'
+  artifact:
+  - AI Tutors
+  - Microlearning Platforms
+- name: legal_risk_checker
+  args:
+    domain: education
+    mock: true
+  output: 'Legal risk for domain education are: [''Student Data Privacy'', ''Content Licensing Issues'']'
+  artifact:
+  - Student Data Privacy
+  - Content Licensing Issues
+- name: risk_score_calculator
+  args:
+    idea_details: EdTech AI Mentor Platform
+    mock: true
+  output: 'Total risk score for an idea - EdTech AI Mentor Platform are: 7'
+  artifact: 7
+- name: risk_score_calculator
+  args:
+    idea_details: Virtual Reality Classroom Experience
+    mock: true
+  output: 'Total risk score for an idea - Virtual Reality Classroom Experience are: 8'
+  artifact: 8
+- name: risk_score_calculator
+  args:
+    idea_details: Skill-Based Micro-Certification Platform
+    mock: true
+  output: 'Total risk score for an idea - Skill-Based Micro-Certification Platform are: 5'
+  artifact: 5

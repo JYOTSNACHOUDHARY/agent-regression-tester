@@ -1,0 +1,60 @@
+# Replays the recorded agent runs on every PR that can change agent behaviour,
+# posts the report as a single sticky PR comment, and fails the check on regressions.
+name: Agent regression tests
+
+on:
+  pull_request:
+    paths:
+      - "examples/**"
+      - "cases/**"
+      - "src/**"
+      - "agentreg.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: agentreg-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  agentreg:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Install
+        run: uv sync --frozen
+
+      - name: Replay test cases (stubbed tools, 3 repeats, majority vote)
+        id: replay
+        continue-on-error: true
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: uv run agentreg run --tools stub --repeats 3
+
+      - name: Post report to the PR
+        if: always() && github.event_name == 'pull_request' && hashFiles('reports/report.md') != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: uv run agentreg comment reports/report.md
+
+      - name: Upload full report
+        if: always() && hashFiles('reports/report.md') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: agentreg-report
+          path: |
+            reports/report.md
+            reports/report.json
+
+      - name: Fail on regressions
+        if: steps.replay.outcome == 'failure'
+        run: |
+          echo "::error::Agent regressions found - see the PR comment or the agentreg-report artifact."
+          exit 1
