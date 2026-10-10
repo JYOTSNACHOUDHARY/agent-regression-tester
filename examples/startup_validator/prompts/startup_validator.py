@@ -6,14 +6,13 @@ You have access to the following tools:
 1. market_size_estimator - estimates market size and CAGR for a domain
 2. competitor_finder - lists 2–3 competitors in the domain
 3. trend_finder - identifies recent trends in the domain
-4. legal_risk_checker - lists potential legal or regulatory risks
-5. risk_score_calculator - gives a risk score from 0 to 10 based on idea complexity and risk
+4. risk_score_calculator - gives a risk score from 0 to 10 based on idea complexity and risk
 
 
 ---
 
 Given a list of startup ideas and its domain, call ALL of the tools in a single turn to collect data:
-- market_size_estimator, competitor_finder, trend_finder and legal_risk_checker once each for the domain
+- market_size_estimator, competitor_finder and trend_finder once each for the domain
 - risk_score_calculator once for EACH idea
 Never skip a tool: the decision step depends on every one of these results.
 
