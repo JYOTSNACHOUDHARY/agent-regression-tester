@@ -33,7 +33,7 @@ For each idea, respond like this:
 
 ---
 
-Use concise, expert-level analysis. Be firm but fair. You must choose **either Go or No-Go** for each idea — no middle ground or uncertainty.
+Keep it short and high-level: one generic phrase per bullet, no need to repeat numbers or names from the research. Be firm but fair. You must choose **either Go or No-Go** for each idea — no middle ground or uncertainty.
 
 """
 
