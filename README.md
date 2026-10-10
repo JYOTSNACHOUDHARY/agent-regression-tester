@@ -37,6 +37,18 @@ This is a real report. A change to the demo agent's decision prompt ("keep reaso
 
 On the unchanged agent, the same suite returns 5/5 ✅ with every case at 6/6 criteria.
 
+## Live demo PRs
+
+Three plausible-looking changes to the demo agent, each left open with agentreg's comment on it:
+
+| PR | The change | What agentreg reported | Caught by |
+|---|---|---|---|
+| [#1](https://github.com/JYOTSNACHOUDHARY/agent-regression-tester/pull/1) | "Simplify" the validator prompt by dropping `legal_risk_checker` | ❌ 5/5 regressed: `required_tools: not called: legal_risk_checker` | Deterministic checks (the judge still rated the answers 6/6) |
+| [#2](https://github.com/JYOTSNACHOUDHARY/agent-regression-tester/pull/2) | Make decision summaries "shorter and higher-level" | ❌ 4 regressed, ⚠️ 1 flaky: criteria fell from 6/6 to 4/6 because answers stopped citing evidence | Checklist LLM judge (every deterministic check passed) |
+| [#3](https://github.com/JYOTSNACHOUDHARY/agent-regression-tester/pull/3) | Switch the agent from `gpt-4o` to `gpt-4o-mini` to cut cost | 💥 5/5 errored: `NotImplementedError` from the tools | Crash capture: the tools expose an internal `mock` flag in their schema, and gpt-4o-mini sets it to `false` |
+
+PR #1 and PR #2 are the reason agentreg has two layers. Each catches a regression the other misses.
+
 ## How it works
 
 ```mermaid
@@ -86,6 +98,7 @@ The demo target is [startupIdeaGenerator](https://github.com/JYOTSNACHOUDHARY/st
 | The validator sometimes skipped research tools | `required_tools` failed in 4 of 40 runs (10%) | Prompt now requires every tool: **0 of 20** runs failed after the fix |
 | The decision step only saw the *last* tool result | Verdicts cited one risk score and nothing else | It now reads every tool result from the research turn |
 | A "be generic" prompt edit | Judge: 4/6 vs 6/6 criteria, in 5 of 5 cases | That's the regression the suite exists to catch |
+| `gpt-4o-mini` passes `mock: false` to the tools | 5/5 cases crash ([PR #3](https://github.com/JYOTSNACHOUDHARY/agent-regression-tester/pull/3)) | Open: hide `mock` from the LLM with an injected argument |
 
 ## Quickstart
 
