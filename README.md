@@ -2,6 +2,8 @@
 
 **Change a prompt, model or tool, and know exactly what broke before you merge.**
 
+**▶ [Interactive demo](https://jyotsnachoudhary.github.io/agent-regression-tester/)**: pick one of three real pull requests and watch agentreg catch the regression that code review missed.
+
 agentreg records real agent runs, turns them into editable test cases, replays them after every change, and flags regressions. It uses cheap deterministic checks (*did it call the right tools? did it stay within budget?*) plus an evidence-grounded LLM judge, then posts the result as a sticky comment on your pull request.
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)

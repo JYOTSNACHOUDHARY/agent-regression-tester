@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>[hidden]{display:none!important} img{max-width:100%}</style>
+<title>agentreg Live Demo</title>
+<meta name="description" content="agentreg: regression tests for LLM agents. See it catch three real regressions that code review missed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a single reading column that widens into a two-pane "PR | CI run" console for the demo. */
+:root {
+  --paper: #f4f6fa; --surface: #ffffff; --sunken: #eef1f6; --ink: #121826; --muted: #586276; --line: #dde2eb;
+  --accent: #3346d3; --accent-ink: #ffffff; --accent-soft: #e6e9fb;
+  --pass: #1d8049; --pass-soft: #e3f3e9; --fail: #c9303a; --fail-soft: #fbe6e7;
+  --flaky: #a96800; --flaky-soft: #fbf0dc; --error: #7c3cc4; --error-soft: #f1e8fb;
+  --add: #e3f3e9; --del: #fbe6e7; --idle: #c9cfda;
+  --display: "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+  --body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0d1118; --surface: #151a24; --sunken: #1b2130; --ink: #e7ebf3; --muted: #9aa4b8; --line: #283043;
+  --accent: #8e9cff; --accent-ink: #0d1118; --accent-soft: #232a4a;
+  --pass: #52c485; --pass-soft: #15291f; --fail: #ff7277; --fail-soft: #33181b;
+  --flaky: #eaae45; --flaky-soft: #30250f; --error: #c39bff; --error-soft: #271c3a;
+  --add: #15291f; --del: #33181b; --idle: #3a4256; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #0d1118; --surface: #151a24; --sunken: #1b2130; --ink: #e7ebf3; --muted: #9aa4b8; --line: #283043;
+  --accent: #8e9cff; --accent-ink: #0d1118; --accent-soft: #232a4a;
+  --pass: #52c485; --pass-soft: #15291f; --fail: #ff7277; --fail-soft: #33181b;
+  --flaky: #eaae45; --flaky-soft: #30250f; --error: #c39bff; --error-soft: #271c3a;
+  --add: #15291f; --del: #33181b; --idle: #3a4256; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--paper); color: var(--ink); font: 16px/1.6 var(--body); margin: 0 }
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px) }
+a { color: var(--accent) }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px }
+h1, h2, h3 { font-family: var(--display); line-height: 1.08; text-wrap: balance; margin: 0 }
+h2 { font-size: clamp(1.7rem, 3.4vw, 2.4rem); font-weight: 800; letter-spacing: -0.01em }
+h3 { font-size: 1.15rem; font-weight: 600 }
+p { margin: 0 }
+code, pre, .mono { font-family: var(--mono); font-size: 0.86em }
+.eyebrow { font: 600 0.75rem/1 var(--body); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted) }
+.lede { color: var(--muted); max-width: 62ch; font-size: 1.08rem }
+section { padding-block: clamp(48px, 8vw, 88px) }
+section + section { border-top: 1px solid var(--line) }
+.section-head { display: grid; gap: 12px; margin-bottom: 32px }
+
+/* Top bar */
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 18px }
+.mark { font: 800 1.25rem/1 var(--display); color: var(--ink); text-decoration: none; display: inline-flex; gap: 8px; align-items: center }
+.mark span { color: var(--accent) }
+.bar nav { display: flex; gap: 20px; font-weight: 600; font-size: 0.92rem }
+.bar nav a { color: var(--muted); text-decoration: none }
+.bar nav a:hover { color: var(--ink) }
+
+/* Hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 64px); align-items: center; padding-block: clamp(32px, 6vw, 72px) clamp(48px, 8vw, 88px) }
+.hero h1 { font-size: clamp(2.4rem, 6vw, 4.2rem); font-weight: 800; letter-spacing: -0.02em; margin-block: 14px 20px }
+.hero h1 em { font-style: normal; color: var(--accent) }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px }
+.btn { display: inline-flex; align-items: center; gap: 8px; font: 600 0.98rem/1 var(--body); padding: 13px 20px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); text-decoration: none; cursor: pointer }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent) }
+.btn:hover { filter: brightness(1.05) }
+
+/* GitHub-style checks box in the hero */
+.checks { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 18px 50px -24px rgb(18 24 38 / 0.35); overflow: hidden; min-width: 0 }
+.checks-head { padding: 16px 18px; border-bottom: 1px solid var(--line); display: grid; gap: 4px }
+.checks-head b { font-size: 0.98rem }
+.checks-head small { color: var(--muted) }
+.check-row { display: flex; gap: 12px; align-items: flex-start; padding: 14px 18px; border-bottom: 1px solid var(--line) }
+.check-row:last-child { border-bottom: 0 }
+.check-row .mono { font-size: 0.78rem; color: var(--muted); display: block; margin-top: 2px; overflow-wrap: anywhere }
+.dot { flex: none; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font: 700 12px/1 var(--body); color: var(--surface); margin-top: 2px }
+.dot.ok { background: var(--pass) } .dot.bad { background: var(--fail) }
+.merge { background: var(--fail-soft); color: var(--fail); font-weight: 600; font-size: 0.9rem; padding: 12px 18px }
+
+/* Value points */
+.points { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 3vw, 40px) }
+.point { display: grid; gap: 8px; align-content: start }
+.point .num { font: 800 2rem/1 var(--display); color: var(--accent) }
+.point p { color: var(--muted) }
+
+/* Demo */
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px }
+.tab { font: 600 0.92rem/1.2 var(--body); padding: 10px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; text-align: left }
+.tab small { display: block; font-weight: 500; color: var(--muted); font-size: 0.78rem }
+.tab[aria-selected="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink) }
+.tab[aria-selected="true"] small { color: var(--idle) }
+.console { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden }
+.pane { padding: clamp(18px, 2.5vw, 28px); display: grid; gap: 18px; align-content: start; min-width: 0 }
+.pane + .pane { border-left: 1px solid var(--line); background: var(--sunken) }
+.pane-label { display: flex; justify-content: space-between; align-items: center; gap: 12px }
+.review { border-left: 3px solid var(--pass); padding: 2px 0 2px 12px; color: var(--muted); font-size: 0.94rem }
+.review b { color: var(--ink) }
+.diff { background: var(--sunken); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; font: 0.78rem/1.55 var(--mono); margin: 0; padding: 10px 0 }
+.diff div { padding-inline: 14px; white-space: pre }
+.diff .a { background: var(--add); color: var(--pass) }
+.diff .d { background: var(--del); color: var(--fail) }
+.diff .h { color: var(--muted) }
+.why { font-size: 0.94rem; color: var(--muted) }
+
+.run-btn { justify-self: start }
+.grid-run { display: grid; gap: 6px }
+.case { display: grid; grid-template-columns: 6.5rem auto 1fr; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font-size: 0.9rem }
+.case .name { font-family: var(--mono); font-size: 0.82rem }
+.reps { display: flex; gap: 5px }
+.rep { width: 14px; height: 14px; border-radius: 4px; background: var(--idle); transition: background 0.2s }
+.rep.p { background: var(--pass) } .rep.f { background: var(--fail) } .rep.e { background: var(--error) }
+.chip { justify-self: end; font: 600 0.78rem/1 var(--body); padding: 6px 9px; border-radius: 999px; white-space: nowrap; background: var(--sunken); color: var(--muted) }
+.chip.passed { background: var(--pass-soft); color: var(--pass) }
+.chip.regressed { background: var(--fail-soft); color: var(--fail) }
+.chip.flaky { background: var(--flaky-soft); color: var(--flaky) }
+.chip.error { background: var(--error-soft); color: var(--error) }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.78rem; color: var(--muted) }
+.legend span { display: inline-flex; align-items: center; gap: 6px }
+.legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block }
+
+.verdict { border-radius: 12px; padding: 14px 16px; font-weight: 600; display: grid; gap: 4px }
+.verdict small { font-weight: 500; opacity: 0.9 }
+.verdict.bad { background: var(--fail-soft); color: var(--fail) }
+.verdict.err { background: var(--error-soft); color: var(--error) }
+.verdict.ok { background: var(--pass-soft); color: var(--pass) }
+.layers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px }
+.layer { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 10px 12px; font-size: 0.82rem; display: grid; gap: 4px; align-content: start }
+.layer b { font-size: 0.86rem }
+.layer .state { font-weight: 700; font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted) }
+.layer.hit { border-color: var(--fail); box-shadow: inset 0 0 0 1px var(--fail) }
+.layer.hit .state { color: var(--fail) }
+.layer.crash { border-color: var(--error); box-shadow: inset 0 0 0 1px var(--error) }
+.layer.crash .state { color: var(--error) }
+.layer.clean .state { color: var(--pass) }
+.evidence { display: grid; gap: 10px; font-size: 0.9rem }
+.criteria { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px }
+.criteria li { display: grid; grid-template-columns: 1.4rem 1fr; gap: 6px }
+.criteria .y { color: var(--pass); font-weight: 700 } .criteria .n { color: var(--fail); font-weight: 700 }
+.criteria li.miss span:last-child { font-weight: 600 }
+blockquote { margin: 0; padding: 10px 14px; border-left: 3px solid var(--line); color: var(--muted); font-size: 0.88rem; background: var(--surface); border-radius: 0 8px 8px 0 }
+.failed-check { font: 0.82rem/1.5 var(--mono); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; overflow-wrap: anywhere }
+.metrics-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface) }
+table { border-collapse: collapse; width: 100%; font-size: 0.84rem; font-variant-numeric: tabular-nums }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); white-space: nowrap }
+th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600 }
+tr:last-child td { border-bottom: 0 }
+.down { color: var(--pass) } .up { color: var(--fail) }
+.cost { font-size: 0.82rem; color: var(--muted) }
+.compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px }
+.compare pre { margin: 0; white-space: pre-wrap; font-size: 0.74rem; line-height: 1.5; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; min-width: 0 }
+.compare .lbl { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 4px }
+details.more summary { cursor: pointer; font-weight: 600; font-size: 0.9rem; color: var(--accent) }
+details.more[open] summary { margin-bottom: 10px }
+
+/* Two layers matrix */
+.matrix-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 14px }
+.matrix td, .matrix th { padding: 14px 18px; white-space: normal; vertical-align: top }
+.matrix td:first-child { min-width: 14rem }
+.tag { display: inline-block; font: 700 0.74rem/1 var(--body); padding: 6px 9px; border-radius: 999px; white-space: nowrap }
+.tag.caught { background: var(--fail-soft); color: var(--fail) }
+.tag.missed { background: var(--sunken); color: var(--muted) }
+.tag.crashed { background: var(--error-soft); color: var(--error) }
+.matrix small { display: block; color: var(--muted); margin-top: 6px }
+
+/* How it works */
+.steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; counter-reset: step }
+.step { display: grid; gap: 10px; align-content: start; min-width: 0 }
+.step h3::before { counter-increment: step; content: counter(step); display: inline-grid; place-items: center; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font: 700 0.85rem/1 var(--body); margin-right: 10px; vertical-align: 2px }
+.step p { color: var(--muted); font-size: 0.94rem }
+.step pre { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; overflow-x: auto; font-size: 0.74rem; line-height: 1.5 }
+
+/* Facts */
+.facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 48px }
+.fact { display: grid; gap: 6px; align-content: start }
+.fact p { color: var(--muted); max-width: 52ch }
+
+/* Quickstart */
+.qs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 32px; align-items: start }
+.code { position: relative; background: var(--ink); color: var(--paper); border-radius: 12px; padding: 18px 20px; overflow-x: auto; font: 0.84rem/1.7 var(--mono); margin: 0 }
+.code .c { color: var(--idle) }
+.copy { position: absolute; top: 10px; right: 10px; font: 600 0.78rem/1 var(--body); padding: 7px 10px; border-radius: 7px; border: 1px solid var(--muted); background: transparent; color: var(--paper); cursor: pointer }
+
+footer { border-top: 1px solid var(--line); padding-block: 28px; color: var(--muted); font-size: 0.9rem }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between }
+
+@media (max-width: 900px) {
+  .hero, .console, .qs { grid-template-columns: minmax(0, 1fr) }
+  .pane + .pane { border-left: 0; border-top: 1px solid var(--line) }
+  .steps { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+}
+@media (max-width: 620px) {
+  .points, .facts, .steps, .layers, .compare { grid-template-columns: minmax(0, 1fr) }
+  .bar nav a:not(.gh) { display: none }
+  .case { grid-template-columns: 5.6rem auto 1fr }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="bar">
+    <a class="mark" href="#top"><span>▲</span>agentreg</a>
+    <nav>
+      <a href="#demo">Demo</a>
+      <a href="#how">How it works</a>
+      <a href="#start">Quickstart</a>
+      <a class="gh" href="https://github.com/JYOTSNACHOUDHARY/agent-regression-tester">GitHub ↗</a>
+    </nav>
+  </header>
+
+  <div class="hero" id="top">
+    <div>
+      <p class="eyebrow">Regression tests for LLM agents</p>
+      <h1>Change a prompt. Know what broke <em>before you merge.</em></h1>
+      <p class="lede">LLM agents rarely fail loudly. A tidier prompt or a cheaper model can make your agent skip a tool, give vaguer answers or crash, and code review won't catch it. agentreg replays real agent runs on every pull request and shows you what changed, case by case, in a comment on the PR.</p>
+      <div class="cta">
+        <a class="btn primary" href="#demo">See it catch 3 real bugs ↓</a>
+        <a class="btn" href="https://github.com/JYOTSNACHOUDHARY/agent-regression-tester">View on GitHub</a>
+      </div>
+    </div>
+    <div class="checks" aria-label="Example of the pull-request checks agentreg adds">
+      <div class="checks-head">
+        <b>Make decision summaries shorter</b>
+        <small>Pull request #2 · 1 file changed · +1 −1</small>
+      </div>
+      <div class="check-row"><span class="dot ok">✓</span><div>tests<span class="mono">23 passed · the code still works</span></div></div>
+      <div class="check-row"><span class="dot bad">✕</span><div><b>agentreg</b> · 4 regressed, 1 flaky<span class="mono">judge: "does not cite the market size ($1B), CAGR (5%) or risk scores"</span></div></div>
+      <div class="merge">Merging is blocked: the agent's answers got worse.</div>
+    </div>
+  </div>
+
+  <div class="points" aria-label="What agentreg gives you">
+    <div class="point"><span class="num">2 layers</span><h3>Catches the silent regressions</h3><p>Fast rule-based checks (tools called, budgets, output format) plus an LLM judge that checks answers against the agent's own research.</p></div>
+    <div class="point"><span class="num">$0.17</span><h3>Cheap enough for every PR</h3><p>5 test cases × 3 runs each, judge included. The agent's spend and the judge's spend are reported separately.</p></div>
+    <div class="point"><span class="num">3 runs</span><h3>No random red builds</h3><p>Agents are nondeterministic, so each case runs 3 times and the majority decides. A one-off failure shows as ⚠️ flaky and doesn't block the merge.</p></div>
+  </div>
+</div>
+
+<section id="demo">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Interactive demo · real results</p>
+      <h2>Three pull requests that look harmless</h2>
+      <p class="lede">The agent under test is a LangGraph app that researches startup ideas with five tools and gives each a Go / No-Go verdict. Pick a change, read the diff as a reviewer would, then watch what agentreg reports. Every number below comes from the real report on that PR.</p>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Pick a change" id="tabs"></div>
+
+    <div class="console">
+      <div class="pane" id="left"></div>
+      <div class="pane" id="right" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Why two layers</p>
+      <h2>Each layer catches a bug the other one misses</h2>
+      <p class="lede">Rule-based checks are cheap and exact, but they can't tell a vague answer from a good one. An LLM judge reads for quality, but it gave full marks to answers made without the legal research. You need both.</p>
+    </div>
+    <div class="matrix-wrap">
+      <table class="matrix">
+        <thead><tr><th>Change</th><th>Rule-based checks</th><th>LLM judge</th><th>Outcome</th></tr></thead>
+        <tbody>
+          <tr><td><b>#1 Drop a tool from the prompt</b><small>Agent stops researching legal risk</small></td>
+              <td><span class="tag caught">Caught</span><small><code>required_tools</code>: not called: legal_risk_checker</small></td>
+              <td><span class="tag missed">Missed</span><small>Still scored every answer 6/6</small></td>
+              <td>❌ 5/5 regressed</td></tr>
+          <tr><td><b>#2 Shorter summaries</b><small>Answers stop citing the evidence</small></td>
+              <td><span class="tag missed">Missed</span><small>Same tools, same format, within budget</small></td>
+              <td><span class="tag caught">Caught</span><small>Criteria fell from 6/6 to 4/6</small></td>
+              <td>❌ 4 regressed, ⚠️ 1 flaky</td></tr>
+          <tr><td><b>#3 Switch to a cheaper model</b><small>gpt-4o → gpt-4o-mini</small></td>
+              <td><span class="tag crashed">Crashed</span><small>Every tool raised <code>NotImplementedError</code></small></td>
+              <td><span class="tag missed">Skipped</span><small>Nothing to judge</small></td>
+              <td>💥 5/5 errored</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">How it works</p>
+      <h2>Snapshot testing, built for agents</h2>
+      <p class="lede">Works with any LangChain or LangGraph agent, with no changes to its code. You record a good run once and agentreg turns it into a test case that it replays on every pull request.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><h3>Record</h3><p>Run the agent once. A LangChain callback captures every LLM call and tool call, with tokens, cost and latency.</p><pre>agentreg record "healthcare"</pre></div>
+      <div class="step"><h3>Capture</h3><p>The run becomes an editable YAML test case. Required tools and budgets are filled in from the recorded run.</p><pre>expect:
+  required_tools: [legal_risk_checker, …]
+  max_tokens: 2714</pre></div>
+      <div class="step"><h3>Replay</h3><p>Every case runs 3 times. Tool outputs can be served from the recording, so you test your change and not today's API responses.</p><pre>agentreg run --tools stub --repeats 3</pre></div>
+      <div class="step"><h3>Report</h3><p>One comment on the pull request, updated on every push, and a failing check when something regressed.</p><pre>✅ passed   ❌ regressed
+⚠️ flaky    ⬆️ improved</pre></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Design decisions, backed by data</p>
+      <h2>Built to be trusted in CI</h2>
+    </div>
+    <div class="facts">
+      <div class="fact"><h3>Majority vote over repeats</h3><p>Even the unchanged agent skipped a required tool in 4 of 40 runs. With one run per case across 5 cases, roughly 4 PRs in 10 would get a red build for no reason.</p></div>
+      <div class="fact"><h3>A judge that grades against evidence</h3><p>The first version compared two answers side by side and mostly picked whichever came first. Now it grades one answer at a time against yes/no criteria, using that run's own tool results as evidence.</p></div>
+      <div class="fact"><h3>Intended changes are one command</h3><p><code>agentreg run --accept</code> makes the latest run the new reference, like updating snapshots in Jest. Reviewers see the change as a YAML diff.</p></div>
+      <div class="fact"><h3>Cost is a test result too</h3><p>Tokens, cost and latency are compared with the reference for every case, so a model swap shows exactly what it saves and what it breaks.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="start">
+  <div class="wrap qs">
+    <div class="section-head">
+      <p class="eyebrow">Quickstart</p>
+      <h2>Try it on the demo agent</h2>
+      <p class="lede">Then break it on purpose: remove <code>legal_risk_checker</code> from the validator prompt and run again. Point <code>agentreg.yaml</code> at your own agent when you're ready.</p>
+      <div class="cta"><a class="btn primary" href="https://github.com/JYOTSNACHOUDHARY/agent-regression-tester">Get the code on GitHub</a></div>
+    </div>
+    <pre class="code" id="qs-code"><button class="copy" id="copy" type="button">Copy</button>git clone https://github.com/JYOTSNACHOUDHARY/agent-regression-tester.git
+cd agent-regression-tester
+uv sync
+export OPENAI_API_KEY=sk-...
+
+<span class="c"># run the agent once → trace + test case</span>
+uv run agentreg record "healthcare"
+
+<span class="c"># replay every case; exits with 1 on regressions</span>
+uv run agentreg run --tools stub --repeats 3</pre>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Built by <a href="https://github.com/JYOTSNACHOUDHARY">Jyotsna Choudhary</a> · <a href="https://www.linkedin.com/in/jyotsna-c/">LinkedIn</a></span>
+    <span>MIT licensed · Python 3.12 · LangChain / LangGraph</span>
+  </div>
+</footer>
+
+<script>
+const CASES = ["agritech", "education", "fitness", "healthcare", "pet-care"];
+const CRITERIA = [
+  "Gives an explicit Go or No-Go decision for every idea",
+  "Covers every idea that appears in the evidence",
+  "Cites specific figures from the evidence (market size, CAGR, risk scores)",
+  "Names specific competitors, trends or legal risks from the evidence",
+  "Makes no claims that go beyond the evidence",
+  "Each decision is consistent with its reasoning",
+];
+const PRS = [
+  {
+    id: "pr1", tab: "#1 Drop a tool", sub: "Prompt cleanup",
+    title: "Simplify validator prompt", url: "https://github.com/JYOTSNACHOUDHARY/agent-regression-tester/pull/1",
+    file: "prompts/startup_validator.py",
+    review: "<b>Reviewer:</b> “Shorter prompt, same output format. LGTM 👍”",
+    diff: [
+      ["h", "@@ tools the validator may call @@"],
+      [" ", "3. trend_finder - identifies recent trends"],
+      ["d", "4. legal_risk_checker - lists legal or regulatory risks"],
+      ["d", "5. risk_score_calculator - risk score from 0 to 10"],
+      ["a", "4. risk_score_calculator - risk score from 0 to 10"],
+      ["h", "@@ instructions @@"],
+      ["d", "- market_size_estimator, competitor_finder, trend_finder"],
+      ["d", "  and legal_risk_checker once each for the domain"],
+      ["a", "- market_size_estimator, competitor_finder and"],
+      ["a", "  trend_finder once each for the domain"],
+    ],
+    hidden: "The agent silently stops researching legal risk, so every Go / No-Go verdict is made without it. The output looks exactly the same.",
+    reps: { agritech: "fff", education: "fff", fitness: "fff", healthcare: "fff", "pet-care": "fff" },
+    status: { agritech: "regressed", education: "regressed", fitness: "regressed", healthcare: "regressed", "pet-care": "regressed" },
+    verdict: ["bad", "❌ 5 of 5 cases regressed · merge blocked", "Caught by the rule-based checks. The LLM judge alone would have let this through."],
+    layers: { checks: ["hit", "Caught", "legal_risk_checker never called"], judge: ["clean", "Passed", "Still scored 6/6"], crash: ["clean", "No crash", "Agent finished normally"] },
+    failed: "required_tools: not called: legal_risk_checker",
+    metrics: [["agritech", "1,870 → 1,803", "-4%", "6.0s → 5.0s", "6/6 = ref"], ["education", "1,817 → 1,821", "0%", "9.7s → 4.7s", "6/6 = ref"], ["fitness", "1,809 → 1,805", "0%", "6.4s → 4.9s", "6/6 = ref"], ["healthcare", "1,927 → 1,806", "-6%", "8.1s → 5.5s", "6/6 = ref"], ["pet-care", "1,861 → 1,841", "-1%", "7.8s → 6.2s", "6/6 = ref"]],
+    cost: "Agent $0.1423 · judge $0.0156 · 5 cases × 3 runs",
+  },
+  {
+    id: "pr2", tab: "#2 Shorter summaries", sub: "Prompt wording",
+    title: "Shorter, higher-level decision summaries", url: "https://github.com/JYOTSNACHOUDHARY/agent-regression-tester/pull/2",
+    file: "prompts/decision_maker.py",
+    review: "<b>Reviewer:</b> “Nice, the summaries were too long anyway. Approved.”",
+    diff: [
+      ["h", "@@ decision prompt @@"],
+      ["d", "Use concise, expert-level analysis. Be firm but fair."],
+      ["a", "Keep it short and high-level: one generic phrase per"],
+      ["a", "bullet, no need to repeat numbers or names from the"],
+      ["a", "research. Be firm but fair."],
+      [" ", "You must choose **either Go or No-Go** for each idea."],
+    ],
+    hidden: "Every tool is still called and the format is unchanged, so every rule-based check passes. But the verdicts stop citing the evidence they're based on.",
+    reps: { agritech: "fff", education: "fff", fitness: "ffp", healthcare: "fff", "pet-care": "fpp" },
+    status: { agritech: "regressed", education: "regressed", fitness: "regressed", healthcare: "regressed", "pet-care": "flaky" },
+    verdict: ["bad", "❌ 4 regressed · ⚠️ 1 flaky · merge blocked", "Caught by the LLM judge. Every rule-based check passed."],
+    layers: { checks: ["clean", "Passed", "Same 7 tool calls, format OK"], judge: ["hit", "Caught", "6/6 → 4/6 criteria"], crash: ["clean", "No crash", "Agent finished normally"] },
+    criteria: [1, 1, 0, 0, 1, 1],
+    quote: "The response does not cite specific figures such as the market size ($1B), CAGR (5%), or the exact risk scores (6, 7, 3) from the evidence.",
+    before: "Market Potential: The market size of $1B with a 5% CAGR indicates moderate growth, suitable for specialized niches.\nLegal or Execution Risk: Risk score of 4 indicates manageable risk.",
+    after: "Market Potential: Modest growth potential\nLegal or Execution Risk: Moderate risk level",
+    metrics: [["agritech", "1,870 → 1,633", "-13%", "6.0s → 3.2s", "4/6 vs 6/6"], ["education", "1,817 → 1,699", "-6%", "9.7s → 3.6s", "4/6 vs 6/6"], ["fitness", "1,809 → 1,656", "-8%", "6.4s → 3.5s", "4/6 vs 6/6"], ["healthcare", "1,927 → 1,660", "-14%", "8.1s → 4.5s", "4/6 vs 6/6"], ["pet-care", "1,861 → 1,649", "-11%", "7.8s → 4.2s", "4/6 vs 5/6"]],
+    cost: "Agent $0.1160 · judge $0.0149 · 5 cases × 3 runs",
+  },
+  {
+    id: "pr3", tab: "#3 Cheaper model", sub: "gpt-4o → gpt-4o-mini",
+    title: "Switch the agent to gpt-4o-mini", url: "https://github.com/JYOTSNACHOUDHARY/agent-regression-tester/pull/3",
+    file: "orchestrator/graph.py",
+    review: "<b>Reviewer:</b> “One line, and it cuts our model bill a lot. Ship it.”",
+    diff: [
+      ["h", "@@ model @@"],
+      [" ", "from langchain.chat_models import init_chat_model"],
+      ["d", 'llm = init_chat_model("gpt-4o", model_provider="openai")'],
+      ["a", 'llm = init_chat_model("gpt-4o-mini", model_provider="openai")'],
+    ],
+    hidden: "The tools expose an internal mock flag in their schema. gpt-4o always left it on; gpt-4o-mini sets mock: false, which calls an API that was never implemented.",
+    reps: { agritech: "eee", education: "eee", fitness: "eee", healthcare: "eee", "pet-care": "eee" },
+    status: { agritech: "error", education: "error", fitness: "error", healthcare: "error", "pet-care": "error" },
+    verdict: ["err", "💥 5 of 5 cases crashed · merge blocked", "Tokens halved, but only because the agent crashed halfway through."],
+    layers: { checks: ["crash", "Failed", "completed · no_tool_errors · output format"], judge: ["clean", "Skipped", "No answer to judge"], crash: ["crash", "Caught", "NotImplementedError in every tool"] },
+    failed: 'NotImplementedError: Real API integration not implemented yet.\nmarket_size_estimator({"domain": "agritech", "mock": false})',
+    metrics: [["agritech", "1,870 → 929", "-50%", "6.0s → 4.4s", "–"], ["education", "1,817 → 916", "-50%", "9.7s → 2.2s", "–"], ["fitness", "1,809 → 913", "-50%", "6.4s → 4.0s", "–"], ["healthcare", "1,927 → 935", "-51%", "8.1s → 2.5s", "–"], ["pet-care", "1,861 → 934", "-50%", "7.8s → 2.3s", "–"]],
+    cost: "Agent $0.0035 · judge $0.0000 · 5 cases × 3 runs",
+  },
+  {
+    id: "base", tab: "No change", sub: "Control run",
+    title: "Unchanged agent (control)", url: "https://github.com/JYOTSNACHOUDHARY/agent-regression-tester",
+    file: "no files changed",
+    review: "<b>Why this matters:</b> a test suite that cries wolf gets ignored. On the unchanged agent, agentreg stays green.",
+    diff: [["h", "(no diff)"]],
+    hidden: "Even here the agent is nondeterministic: it invents new startup ideas each run. agentreg compares behaviour and quality, not exact text, so different wording still passes.",
+    reps: { agritech: "ppp", education: "ppp", fitness: "ppp", healthcare: "ppp", "pet-care": "ppp" },
+    status: { agritech: "passed", education: "passed", fitness: "passed", healthcare: "passed", "pet-care": "passed" },
+    verdict: ["ok", "✅ 5 of 5 cases passed · ready to merge", "Every case kept all 6 judge criteria and every rule-based check."],
+    layers: { checks: ["clean", "Passed", "Tools, budgets, format"], judge: ["clean", "Passed", "6/6 criteria"], crash: ["clean", "No crash", "Agent finished normally"] },
+  },
+];
+
+const STATUS_LABEL = { passed: "✅ passed", regressed: "❌ regressed", flaky: "⚠️ flaky", error: "💥 error" };
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const el = (html) => { const t = document.createElement("template"); t.innerHTML = html.trim(); return t.content; };
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+let timers = [];
+
+function renderTabs(activeId) {
+  const tabs = document.getElementById("tabs");
+  tabs.innerHTML = "";
+  for (const pr of PRS) {
+    const b = document.createElement("button");
+    b.className = "tab"; b.type = "button"; b.id = "tab-" + pr.id;
+    b.setAttribute("role", "tab"); b.setAttribute("aria-selected", String(pr.id === activeId));
+    b.innerHTML = `${esc(pr.tab)}<small>${esc(pr.sub)}</small>`;
+    b.addEventListener("click", () => select(pr.id, true));
+    tabs.append(b);
+  }
+}
+
+function renderLeft(pr) {
+  const diff = pr.diff.map(([k, line]) =>
+    `<div class="${k === "a" ? "a" : k === "d" ? "d" : k === "h" ? "h" : ""}">${k === "a" ? "+ " : k === "d" ? "- " : k === "h" ? "" : "  "}${esc(line)}</div>`).join("");
+  const left = document.getElementById("left");
+  left.innerHTML = "";
+  left.append(el(`
+    <div class="pane-label"><span class="eyebrow">The change</span>${pr.id !== "base" ? `<a href="${pr.url}" class="mono">View PR ↗</a>` : ""}</div>
+    <div><h3>${esc(pr.title)}</h3><p class="mono" style="color:var(--muted)">${esc(pr.file)}</p></div>
+    <pre class="diff">${diff}</pre>
+    <p class="review">${pr.review}</p>
+    <div><p class="eyebrow" style="margin-bottom:6px">What actually happens</p><p class="why">${esc(pr.hidden)}</p></div>
+  `));
+}
+
+function renderRight(pr, animate) {
+  timers.forEach(clearTimeout); timers = [];
+  const right = document.getElementById("right");
+  right.innerHTML = "";
+  right.append(el(`
+    <div class="pane-label"><span class="eyebrow">agentreg run</span>
+      <button class="btn run-btn" type="button" id="replay">↻ Run again</button></div>
+    <div class="grid-run">${CASES.map((c) => `
+      <div class="case" data-case="${c}"><span class="name">${c}</span>
+        <span class="reps">${[0, 1, 2].map(() => `<i class="rep"></i>`).join("")}</span>
+        <span class="chip">queued</span></div>`).join("")}
+    </div>
+    <div class="legend"><span><i style="background:var(--pass)"></i>run passed</span><span><i style="background:var(--fail)"></i>run failed</span><span><i style="background:var(--error)"></i>run crashed</span><span>3 runs per case, majority decides</span></div>
+    <div id="result" hidden></div>
+  `));
+  document.getElementById("replay").addEventListener("click", () => renderRight(pr, true));
+
+  const step = animate && !reduceMotion ? 170 : 0;
+  let t = 0;
+  for (const c of CASES) {
+    const row = right.querySelector(`[data-case="${c}"]`);
+    const reps = row.querySelectorAll(".rep");
+    const chip = row.querySelector(".chip");
+    const later = (fn, d) => step ? timers.push(setTimeout(fn, d)) : fn();
+    later(() => { chip.textContent = "running…"; }, t);
+    [...pr.reps[c]].forEach((r, i) => { t += step; later(() => reps[i].classList.add(r), t); });
+    t += step;
+    later(() => { chip.className = "chip " + pr.status[c]; chip.textContent = STATUS_LABEL[pr.status[c]]; }, t);
+  }
+  const show = () => renderResult(pr);
+  step ? timers.push(setTimeout(show, t + 150)) : show();
+}
+
+function renderResult(pr) {
+  const box = document.getElementById("result");
+  const [vk, vTitle, vSub] = pr.verdict;
+  const layer = (name, [cls, state, note]) =>
+    `<div class="layer ${cls}"><span class="state">${state}</span><b>${name}</b><span>${esc(note)}</span></div>`;
+  let evidence = "";
+  if (pr.failed) evidence += `<div><p class="eyebrow" style="margin-bottom:6px">Failed check</p><div class="failed-check">${esc(pr.failed).replace(/\n/g, "<br>")}</div></div>`;
+  if (pr.criteria) {
+    evidence += `<div><p class="eyebrow" style="margin-bottom:6px">Judge checklist (agritech)</p><ul class="criteria">${CRITERIA.map((c, i) =>
+      `<li class="${pr.criteria[i] ? "" : "miss"}"><span class="${pr.criteria[i] ? "y" : "n"}">${pr.criteria[i] ? "✓" : "✕"}</span><span>${esc(c)}</span></li>`).join("")}</ul></div>
+      <blockquote>“${esc(pr.quote)}”<br><small>— the judge's reason</small></blockquote>
+      <div class="compare"><div><p class="lbl">Before (reference)</p><pre>${esc(pr.before)}</pre></div><div><p class="lbl">After this PR</p><pre>${esc(pr.after)}</pre></div></div>`;
+  }
+  const table = pr.metrics ? `<details class="more"${pr.id === "pr3" ? " open" : ""}><summary>Tokens, latency and judge score per case</summary>
+    <div class="metrics-wrap"><table><thead><tr><th>Case</th><th>Tokens</th><th>Δ</th><th>Latency</th><th>Judge</th></tr></thead><tbody>
+    ${pr.metrics.map(([c, tok, d, lat, j]) => `<tr><td class="mono">${c}</td><td>${tok}</td><td>${d}</td><td>${lat}</td><td>${j}</td></tr>`).join("")}
+    </tbody></table></div><p class="cost" style="margin-top:8px">${esc(pr.cost)}</p></details>` : "";
+  box.innerHTML = "";
+  box.append(el(`
+    <div class="evidence">
+      <div class="verdict ${vk}">${esc(vTitle)}<small>${esc(vSub)}</small></div>
+      <div class="layers">${layer("Rule-based checks", pr.layers.checks)}${layer("LLM judge", pr.layers.judge)}${layer("Crash capture", pr.layers.crash)}</div>
+      ${evidence}
+      ${table}
+    </div>`));
+  box.hidden = false;
+}
+
+function select(id, animate) {
+  const pr = PRS.find((p) => p.id === id);
+  renderTabs(id); renderLeft(pr); renderRight(pr, animate);
+  try { localStorage.setItem("agentreg-demo-tab", id); } catch (e) {}
+}
+
+let start = "pr1";
+try { const saved = localStorage.getItem("agentreg-demo-tab"); if (PRS.some((p) => p.id === saved)) start = saved; } catch (e) {}
+select(start, false);
+
+document.getElementById("copy").addEventListener("click", async (e) => {
+  const text = document.getElementById("qs-code").innerText.replace(/^Copy\n?/, "").replace(/^Copied\n?/, "");
+  try { await navigator.clipboard.writeText(text); e.target.textContent = "Copied"; }
+  catch (err) { const r = document.createRange(); r.selectNodeContents(document.getElementById("qs-code")); getSelection().removeAllRanges(); getSelection().addRange(r); e.target.textContent = "Press ⌘C"; }
+  setTimeout(() => { e.target.textContent = "Copy"; }, 2000);
+});
+</script>
+</body>
+</html>
